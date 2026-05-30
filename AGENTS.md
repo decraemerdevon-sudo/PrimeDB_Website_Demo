@@ -6,7 +6,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # PR workflow
 
-After pushing changes, automatically open a pull request and enable auto-merge
-(squash) so it merges itself once CI passes. If CI fails, diagnose and fix it (or
-report back if it's out of scope) rather than merging a red PR. Don't wait for
-manual approval to create or merge routine PRs.
+After pushing changes, automatically open a pull request and merge it (squash)
+once CI passes — don't wait for manual approval on routine PRs. Prefer GitHub's
+native auto-merge; if the repo doesn't have "Allow auto-merge" enabled, just
+merge the PR directly yourself once CI is green. Either way, if CI fails,
+diagnose and fix it (or report back if it's out of scope) rather than merging a
+red PR.
