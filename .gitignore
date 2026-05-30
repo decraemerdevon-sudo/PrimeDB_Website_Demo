@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# claude code — keep personal/session settings out of git
+.claude/settings.local.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
