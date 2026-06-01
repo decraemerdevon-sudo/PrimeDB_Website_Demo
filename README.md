@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Change Order Management System
 
-## Getting Started
+Turns messy, informal construction change-order requests (voice transcriptions, emails, texts) into formal, tracked change orders. Built for [Prime Design Build](https://www.primedb.ca).
 
-First, run the development server:
+This is **V1 (MVP)**: paste a description → AI extracts the key fields → review/edit → store it → generate a formal Word document → view all change orders by project.
+
+## Features (V1)
+
+1. **Input & parse** — paste a messy description; Claude extracts project, scope, cost, approval status, initiator, and date into structured fields.
+2. **Review & edit** — confirm or correct the parsed fields, match to a project, set status.
+3. **Store** — change orders are persisted in Postgres with an auto-generated CO number (e.g. `CO-0001`).
+4. **Document** — download a professional, formatted `.docx` change order with company details, scope, cost, standard terms, and signature blocks.
+5. **Track** — dashboard lists every change order, filterable by project, with status badges.
+
+> Phase 4 (unsigned-CO reminders / workflow automation) is intentionally **not** built yet.
+
+## Tech stack
+
+- **Next.js 16** (App Router, Server Actions) + **React 19** + **Tailwind v4**
+- **Postgres** via Vercel Postgres / Neon (`@neondatabase/serverless`)
+- **Claude API** (`@anthropic-ai/sdk`, structured outputs) for parsing
+- **`docx`** for Word-document generation
+- Deployed on **Vercel**
+
+## Setup
+
+Two environment variables are required for the live app:
+
+| Variable | What it's for | How to set it |
+|---|---|---|
+| `DATABASE_URL` | Postgres connection | In Vercel → **Storage** → create a **Postgres (Neon)** database and connect it to the project. Vercel sets this automatically. (`POSTGRES_URL` also works.) |
+| `ANTHROPIC_API_KEY` | AI parsing | Vercel → **Settings → Environment Variables**. Get a key from the [Anthropic Console](https://console.anthropic.com). |
+
+The database schema is created automatically on first use, along with a few sample projects so the dashboard works immediately. Without `DATABASE_URL`, the app shows a setup notice instead of crashing; without `ANTHROPIC_API_KEY`, you can still fill in change-order fields manually.
+
+### Local development
 
 ```bash
+npm install
+# Create .env.local with DATABASE_URL and ANTHROPIC_API_KEY, then:
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How it's structured
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+  app/
+    page.tsx                         Dashboard — list/filter change orders
+    change-orders/new/               Create flow (server page + client form)
+    api/change-orders/[id]/document/ Route handler: generates & downloads the .docx
+  lib/
+    parse.ts        Claude API parsing (structured outputs)
+    db.ts           Postgres access + lazy schema/seed
+    co-document.ts  Word-document builder
+    actions.ts      Server Actions (parse, create)
+    types.ts        Shared domain types
+```
 
-## Learn More
+## Notes
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- The parser uses `claude-opus-4-8`. To reduce cost, change the `MODEL` constant in `src/lib/parse.ts` to `claude-sonnet-4-6` or `claude-haiku-4-5`.
+- Company details in the generated document live in `src/lib/co-document.ts`.
