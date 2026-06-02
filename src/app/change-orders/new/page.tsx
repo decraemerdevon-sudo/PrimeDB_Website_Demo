@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { ChangeOrderForm } from "@/app/change-orders/_components/change-order-form";
 import { hasDatabase, listProjects } from "@/lib/db";
 import type { Project } from "@/lib/types";
-import { NewChangeOrderForm } from "./new-change-order-form";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +26,7 @@ export default async function NewChangeOrderPage() {
         </p>
       </div>
 
-      <NewChangeOrderForm projects={projects} />
+      <ChangeOrderForm projects={projects} mode="create" />
     </main>
   );
 }

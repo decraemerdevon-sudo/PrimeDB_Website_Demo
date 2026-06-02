@@ -1,5 +1,10 @@
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
-import type { ChangeOrder, NewChangeOrderInput, Project } from "./types";
+import type {
+  ChangeOrder,
+  NewChangeOrderInput,
+  Project,
+  ReviewFlag,
+} from "./types";
 
 // Vercel Postgres / Neon sets DATABASE_URL; the older integration uses POSTGRES_URL.
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
@@ -19,7 +24,7 @@ function getSql(): NeonQueryFunction<false, false> {
   return sqlClient;
 }
 
-// Lazily create the schema (and seed sample projects) once per runtime.
+// Lazily create/upgrade the schema (and seed sample projects) once per runtime.
 let schemaReady: Promise<void> | null = null;
 function ensureSchema(): Promise<void> {
   if (schemaReady) return schemaReady;
@@ -44,13 +49,29 @@ function ensureSchema(): Promise<void> {
         scope_description    TEXT NOT NULL,
         cost_amount          NUMERIC,
         status               TEXT NOT NULL DEFAULT 'Pending Client Signature',
+        approval_status      TEXT,
         initiator            TEXT,
         request_date         DATE,
         raw_input            TEXT,
         client_approval_date DATE,
-        created_at           TIMESTAMPTZ NOT NULL DEFAULT now()
+        created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+        source               TEXT NOT NULL DEFAULT 'manual',
+        source_url           TEXT,
+        source_received_at   TIMESTAMPTZ,
+        source_external_id   TEXT,
+        review_status        TEXT NOT NULL DEFAULT 'confirmed',
+        review_flags         JSONB NOT NULL DEFAULT '[]'::jsonb
       )
     `;
+    // Upgrade existing tables created before these columns existed.
+    await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS approval_status TEXT`;
+    await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS source TEXT NOT NULL DEFAULT 'manual'`;
+    await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS source_url TEXT`;
+    await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS source_received_at TIMESTAMPTZ`;
+    await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS source_external_id TEXT`;
+    await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS review_status TEXT NOT NULL DEFAULT 'confirmed'`;
+    await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS review_flags JSONB NOT NULL DEFAULT '[]'::jsonb`;
+
     const [{ n }] = (await sql`SELECT count(*)::int AS n FROM projects`) as {
       n: number;
     }[];
@@ -80,6 +101,13 @@ function toProject(r: Row): Project {
   };
 }
 
+function parseFlags(value: unknown): ReviewFlag[] {
+  if (!value) return [];
+  // The driver may return jsonb already-parsed or as a string.
+  const raw = typeof value === "string" ? JSON.parse(value) : value;
+  return Array.isArray(raw) ? (raw as ReviewFlag[]) : [];
+}
+
 function toChangeOrder(r: Row): ChangeOrder {
   return {
     id: Number(r.id),
@@ -90,11 +118,18 @@ function toChangeOrder(r: Row): ChangeOrder {
     // NUMERIC comes back as a string from the driver — coerce to number.
     costAmount: r.cost_amount == null ? null : Number(r.cost_amount),
     status: String(r.status),
+    approvalStatus: (r.approval_status as ChangeOrder["approvalStatus"]) ?? "None",
     initiator: (r.initiator as string) ?? null,
     requestDate: (r.request_date as string) ?? null,
     rawInput: (r.raw_input as string) ?? null,
     clientApprovalDate: (r.client_approval_date as string) ?? null,
     createdAt: String(r.created_at),
+    source: (r.source as ChangeOrder["source"]) ?? "manual",
+    sourceUrl: (r.source_url as string) ?? null,
+    sourceReceivedAt: (r.source_received_at as string) ?? null,
+    sourceExternalId: (r.source_external_id as string) ?? null,
+    reviewStatus: (r.review_status as ChangeOrder["reviewStatus"]) ?? "confirmed",
+    reviewFlags: parseFlags(r.review_flags),
   };
 }
 
@@ -105,16 +140,26 @@ export async function listProjects(): Promise<Project[]> {
   return rows.map(toProject);
 }
 
-export async function listChangeOrders(
+// Confirmed change orders for the main dashboard table (optionally per-project).
+export async function listConfirmedChangeOrders(
   projectId?: number,
 ): Promise<ChangeOrder[]> {
   await ensureSchema();
   const sql = getSql();
   const rows = (
     projectId
-      ? await sql`SELECT * FROM change_orders WHERE project_id = ${projectId} ORDER BY id DESC`
-      : await sql`SELECT * FROM change_orders ORDER BY id DESC`
+      ? await sql`SELECT * FROM change_orders WHERE review_status = 'confirmed' AND project_id = ${projectId} ORDER BY id DESC`
+      : await sql`SELECT * FROM change_orders WHERE review_status = 'confirmed' ORDER BY id DESC`
   ) as Row[];
+  return rows.map(toChangeOrder);
+}
+
+// Change orders awaiting human review (the "needs review" queue).
+export async function listNeedsReviewChangeOrders(): Promise<ChangeOrder[]> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows =
+    (await sql`SELECT * FROM change_orders WHERE review_status = 'needs_review' ORDER BY id DESC`) as Row[];
   return rows.map(toChangeOrder);
 }
 
@@ -125,22 +170,43 @@ export async function getChangeOrder(id: number): Promise<ChangeOrder | null> {
   return rows.length ? toChangeOrder(rows[0]) : null;
 }
 
+// Used by the email ingester to avoid processing the same message twice.
+export async function getChangeOrderBySourceId(
+  source: string,
+  externalId: string,
+): Promise<ChangeOrder | null> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows =
+    (await sql`SELECT * FROM change_orders WHERE source = ${source} AND source_external_id = ${externalId} LIMIT 1`) as Row[];
+  return rows.length ? toChangeOrder(rows[0]) : null;
+}
+
 export async function createChangeOrder(
   input: NewChangeOrderInput,
 ): Promise<ChangeOrder> {
   await ensureSchema();
   const sql = getSql();
+
+  const status = input.status;
   const approvalDate =
-    input.status === "Signed" ? new Date().toISOString().slice(0, 10) : null;
+    status === "Signed" ? new Date().toISOString().slice(0, 10) : null;
+  const source = input.source ?? "manual";
+  const reviewStatus = input.reviewStatus ?? "confirmed";
+  const flags = JSON.stringify(input.reviewFlags ?? []);
 
   const [{ id }] = (await sql`
     INSERT INTO change_orders
       (project_id, project_name, scope_description, cost_amount, status,
-       initiator, request_date, raw_input, client_approval_date)
+       approval_status, initiator, request_date, raw_input, client_approval_date,
+       source, source_url, source_received_at, source_external_id,
+       review_status, review_flags)
     VALUES
       (${input.projectId}, ${input.projectName}, ${input.scopeDescription},
-       ${input.costAmount}, ${input.status}, ${input.initiator},
-       ${input.requestDate}, ${input.rawInput}, ${approvalDate})
+       ${input.costAmount}, ${status}, ${input.approvalStatus},
+       ${input.initiator}, ${input.requestDate}, ${input.rawInput}, ${approvalDate},
+       ${source}, ${input.sourceUrl ?? null}, ${input.sourceReceivedAt ?? null},
+       ${input.sourceExternalId ?? null}, ${reviewStatus}, ${flags}::jsonb)
     RETURNING id
   `) as { id: number }[];
 
@@ -151,4 +217,37 @@ export async function createChangeOrder(
   const created = await getChangeOrder(id);
   if (!created) throw new Error("Failed to load the change order after creation.");
   return created;
+}
+
+// Apply a reviewer's edits and mark the change order confirmed (clears flags).
+export async function confirmChangeOrder(
+  id: number,
+  input: NewChangeOrderInput,
+): Promise<ChangeOrder> {
+  await ensureSchema();
+  const sql = getSql();
+
+  const status = input.status;
+  const approvalDate =
+    status === "Signed" ? new Date().toISOString().slice(0, 10) : null;
+
+  await sql`
+    UPDATE change_orders SET
+      project_id = ${input.projectId},
+      project_name = ${input.projectName},
+      scope_description = ${input.scopeDescription},
+      cost_amount = ${input.costAmount},
+      status = ${status},
+      approval_status = ${input.approvalStatus},
+      initiator = ${input.initiator},
+      request_date = ${input.requestDate},
+      client_approval_date = ${approvalDate},
+      review_status = 'confirmed',
+      review_flags = '[]'::jsonb
+    WHERE id = ${id}
+  `;
+
+  const updated = await getChangeOrder(id);
+  if (!updated) throw new Error("Change order not found after confirmation.");
+  return updated;
 }

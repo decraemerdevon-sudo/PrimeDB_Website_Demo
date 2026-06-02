@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createChangeOrder } from "./db";
+import { confirmChangeOrder, createChangeOrder } from "./db";
+import { runEmailIngest, type IngestResult } from "./email-ingest";
 import { MissingApiKeyError, parseChangeOrder } from "./parse";
 import type { NewChangeOrderInput, ParsedChangeOrder } from "./types";
 
@@ -40,4 +41,19 @@ export async function createChangeOrderAction(
   const created = await createChangeOrder(input);
   revalidatePath("/");
   redirect(`/?created=${created.id}`);
+}
+
+export async function approveChangeOrderAction(
+  id: number,
+  input: NewChangeOrderInput,
+): Promise<void> {
+  const confirmed = await confirmChangeOrder(id, input);
+  revalidatePath("/");
+  redirect(`/?created=${confirmed.id}`);
+}
+
+export async function checkEmailNowAction(): Promise<IngestResult> {
+  const result = await runEmailIngest();
+  if (result.created > 0) revalidatePath("/");
+  return result;
 }

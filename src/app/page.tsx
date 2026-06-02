@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { hasDatabase, listChangeOrders, listProjects } from "@/lib/db";
+import { CheckEmailButton } from "@/app/_components/check-email-button";
+import {
+  hasDatabase,
+  listConfirmedChangeOrders,
+  listNeedsReviewChangeOrders,
+  listProjects,
+} from "@/lib/db";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { ChangeOrder, Project } from "@/lib/types";
 
@@ -19,6 +25,11 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+function SourceLabel({ source }: { source: string }) {
+  if (source === "manual") return <span className="text-zinc-400">Manual</span>;
+  return <span className="capitalize text-zinc-600">{source}</span>;
+}
+
 function SetupNotice() {
   return (
     <div className="rounded-lg border border-amber-300 bg-amber-50 p-6 text-amber-900">
@@ -27,8 +38,9 @@ function SetupNotice() {
         No database is configured yet. In your Vercel project, open the{" "}
         <span className="font-medium">Storage</span> tab, create a{" "}
         <span className="font-medium">Postgres (Neon)</span> database, and connect
-        it to this project. Vercel will set the <code className="rounded bg-amber-100 px-1">DATABASE_URL</code>{" "}
-        environment variable automatically. Redeploy and this dashboard will come to life.
+        it to this project. Vercel will set the{" "}
+        <code className="rounded bg-amber-100 px-1">DATABASE_URL</code> environment
+        variable automatically.
       </p>
     </div>
   );
@@ -53,12 +65,14 @@ export default async function DashboardPage({
   const projectId = sp.project ? Number(sp.project) : undefined;
 
   let projects: Project[] = [];
-  let changeOrders: ChangeOrder[] = [];
+  let confirmed: ChangeOrder[] = [];
+  let needsReview: ChangeOrder[] = [];
   let loadError: string | null = null;
   try {
-    [projects, changeOrders] = await Promise.all([
+    [projects, confirmed, needsReview] = await Promise.all([
       listProjects(),
-      listChangeOrders(Number.isInteger(projectId) ? projectId : undefined),
+      listConfirmedChangeOrders(Number.isInteger(projectId) ? projectId : undefined),
+      listNeedsReviewChangeOrders(),
     ]);
   } catch (err) {
     console.error("Failed to load dashboard:", err);
@@ -67,7 +81,7 @@ export default async function DashboardPage({
   }
 
   const created = sp.created
-    ? changeOrders.find((c) => c.id === Number(sp.created))
+    ? confirmed.find((c) => c.id === Number(sp.created))
     : undefined;
 
   return (
@@ -77,7 +91,7 @@ export default async function DashboardPage({
       {created && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-900">
           <span>
-            Created <span className="font-semibold">{created.coNumber}</span> —{" "}
+            Saved <span className="font-semibold">{created.coNumber}</span> —{" "}
             {created.projectName}.
           </span>
           <a
@@ -95,6 +109,57 @@ export default async function DashboardPage({
         </div>
       ) : (
         <>
+          {/* Needs Review queue */}
+          {needsReview.length > 0 && (
+            <section className="mb-8">
+              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-amber-700">
+                Needs Review
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-600 px-1.5 text-xs font-bold text-white">
+                  {needsReview.length}
+                </span>
+              </h2>
+              <div className="space-y-3">
+                {needsReview.map((co) => (
+                  <div
+                    key={co.id}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50/60 px-4 py-3"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="font-mono font-medium text-[#0F2942]">
+                          {co.coNumber}
+                        </span>
+                        <span className="text-zinc-700">{co.projectName}</span>
+                        <span className="text-zinc-400">·</span>
+                        <SourceLabel source={co.source} />
+                      </div>
+                      <p className="mt-0.5 truncate text-sm text-zinc-600">
+                        {co.scopeDescription}
+                      </p>
+                      {co.reviewFlags.length > 0 && (
+                        <p className="mt-0.5 text-xs font-medium text-amber-700">
+                          {co.reviewFlags.length} field
+                          {co.reviewFlags.length === 1 ? "" : "s"} to confirm
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium">
+                        {formatCurrency(co.costAmount)}
+                      </span>
+                      <Link
+                        href={`/change-orders/${co.id}/review`}
+                        className="rounded-md bg-[#B45309] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#92400e]"
+                      >
+                        Review
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Project filter */}
           <div className="mb-5 flex flex-wrap gap-2">
             <FilterPill label="All projects" href="/" active={!projectId} />
@@ -108,7 +173,7 @@ export default async function DashboardPage({
             ))}
           </div>
 
-          {changeOrders.length === 0 ? (
+          {confirmed.length === 0 ? (
             <div className="rounded-lg border border-dashed border-zinc-300 p-12 text-center">
               <p className="text-zinc-600">No change orders yet.</p>
               <Link
@@ -128,18 +193,22 @@ export default async function DashboardPage({
                     <th className="px-4 py-3">Scope</th>
                     <th className="px-4 py-3 text-right">Amount</th>
                     <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Source</th>
                     <th className="px-4 py-3">Created</th>
                     <th className="px-4 py-3 text-right">Document</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100 bg-white">
-                  {changeOrders.map((co) => (
+                  {confirmed.map((co) => (
                     <tr key={co.id} className="hover:bg-zinc-50">
                       <td className="whitespace-nowrap px-4 py-3 font-mono font-medium text-[#0F2942]">
                         {co.coNumber}
                       </td>
                       <td className="px-4 py-3">{co.projectName}</td>
-                      <td className="max-w-xs truncate px-4 py-3 text-zinc-600" title={co.scopeDescription}>
+                      <td
+                        className="max-w-xs truncate px-4 py-3 text-zinc-600"
+                        title={co.scopeDescription}
+                      >
                         {co.scopeDescription}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-right font-medium">
@@ -147,6 +216,9 @@ export default async function DashboardPage({
                       </td>
                       <td className="px-4 py-3">
                         <StatusBadge status={co.status} />
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-xs">
+                        <SourceLabel source={co.source} />
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-zinc-500">
                         {formatDate(co.createdAt)}
@@ -182,12 +254,15 @@ function PageHeader() {
           Turn messy requests into formal, tracked change orders.
         </p>
       </div>
-      <Link
-        href="/change-orders/new"
-        className="rounded-md bg-[#0F2942] px-4 py-2 text-sm font-medium text-white hover:bg-[#1b3d5e]"
-      >
-        + New Change Order
-      </Link>
+      <div className="flex items-center gap-3">
+        <CheckEmailButton />
+        <Link
+          href="/change-orders/new"
+          className="rounded-md bg-[#0F2942] px-4 py-2 text-sm font-medium text-white hover:bg-[#1b3d5e]"
+        >
+          + New Change Order
+        </Link>
+      </div>
     </div>
   );
 }
