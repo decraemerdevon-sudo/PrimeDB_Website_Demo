@@ -1,6 +1,11 @@
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
+import costData from "./cost-data.json";
 import type {
   ChangeOrder,
+  CostEquipment,
+  CostLabour,
+  CostMaterial,
+  HistoricalChangeOrder,
   NewChangeOrderInput,
   Project,
   ReviewFlag,
@@ -71,6 +76,62 @@ function ensureSchema(): Promise<void> {
     await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS source_external_id TEXT`;
     await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS review_status TEXT NOT NULL DEFAULT 'confirmed'`;
     await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS review_flags JSONB NOT NULL DEFAULT '[]'::jsonb`;
+
+    // Cost database: rate catalog + historical reference for the estimator.
+    await sql`
+      CREATE TABLE IF NOT EXISTS cost_materials (
+        id           SERIAL PRIMARY KEY,
+        item_id      TEXT,
+        category     TEXT,
+        sub_category TEXT,
+        description  TEXT NOT NULL,
+        unit         TEXT,
+        unit_cost    NUMERIC,
+        notes        TEXT
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS cost_labour (
+        id             SERIAL PRIMARY KEY,
+        trade_id       TEXT,
+        trade          TEXT,
+        classification TEXT,
+        rate_type      TEXT,
+        rate           NUMERIC,
+        ot_rate        NUMERIC,
+        notes          TEXT
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS cost_equipment (
+        id          SERIAL PRIMARY KEY,
+        equip_id    TEXT,
+        category    TEXT,
+        description TEXT NOT NULL,
+        rate_type   TEXT,
+        rate        NUMERIC,
+        notes       TEXT
+      )
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS historical_change_orders (
+        id             SERIAL PRIMARY KEY,
+        co_ref         TEXT,
+        project        TEXT,
+        description    TEXT NOT NULL,
+        category       TEXT,
+        labour_hours   NUMERIC,
+        labour_cost    NUMERIC,
+        material_cost  NUMERIC,
+        equipment_cost NUMERIC,
+        markup_pct     NUMERIC,
+        total_value    NUMERIC,
+        status         TEXT,
+        notes          TEXT
+      )
+    `;
+
+    await seedCostDatabase(sql);
 
     const [{ n }] = (await sql`SELECT count(*)::int AS n FROM projects`) as {
       n: number;
@@ -250,4 +311,142 @@ export async function confirmChangeOrder(
   const updated = await getChangeOrder(id);
   if (!updated) throw new Error("Change order not found after confirmation.");
   return updated;
+}
+
+// ---- Cost database seeding + reads ----
+
+async function seedCostDatabase(
+  sql: NeonQueryFunction<false, false>,
+): Promise<void> {
+  const [{ n: nm }] = (await sql`SELECT count(*)::int AS n FROM cost_materials`) as {
+    n: number;
+  }[];
+  if (nm === 0) {
+    await sql`
+      INSERT INTO cost_materials (item_id, category, sub_category, description, unit, unit_cost, notes)
+      SELECT "itemId", "category", "subCategory", "description", "unit", "unitCost", "notes"
+      FROM jsonb_to_recordset(${JSON.stringify(costData.materials)}::jsonb) AS x(
+        "itemId" text, "category" text, "subCategory" text, "description" text,
+        "unit" text, "unitCost" numeric, "notes" text
+      )
+    `;
+  }
+
+  const [{ n: nl }] = (await sql`SELECT count(*)::int AS n FROM cost_labour`) as {
+    n: number;
+  }[];
+  if (nl === 0) {
+    await sql`
+      INSERT INTO cost_labour (trade_id, trade, classification, rate_type, rate, ot_rate, notes)
+      SELECT "tradeId", "trade", "classification", "rateType", "rate", "otRate", "notes"
+      FROM jsonb_to_recordset(${JSON.stringify(costData.labour)}::jsonb) AS x(
+        "tradeId" text, "trade" text, "classification" text, "rateType" text,
+        "rate" numeric, "otRate" numeric, "notes" text
+      )
+    `;
+  }
+
+  const [{ n: ne }] = (await sql`SELECT count(*)::int AS n FROM cost_equipment`) as {
+    n: number;
+  }[];
+  if (ne === 0) {
+    await sql`
+      INSERT INTO cost_equipment (equip_id, category, description, rate_type, rate, notes)
+      SELECT "equipId", "category", "description", "rateType", "rate", "notes"
+      FROM jsonb_to_recordset(${JSON.stringify(costData.equipment)}::jsonb) AS x(
+        "equipId" text, "category" text, "description" text, "rateType" text,
+        "rate" numeric, "notes" text
+      )
+    `;
+  }
+
+  const [{ n: nh }] =
+    (await sql`SELECT count(*)::int AS n FROM historical_change_orders`) as {
+      n: number;
+    }[];
+  if (nh === 0) {
+    await sql`
+      INSERT INTO historical_change_orders
+        (co_ref, project, description, category, labour_hours, labour_cost,
+         material_cost, equipment_cost, markup_pct, total_value, status, notes)
+      SELECT "coRef", "project", "description", "category", "labourHours", "labourCost",
+             "materialCost", "equipmentCost", "markupPct", "totalValue", "status", "notes"
+      FROM jsonb_to_recordset(${JSON.stringify(costData.historical)}::jsonb) AS x(
+        "coRef" text, "project" text, "description" text, "category" text,
+        "labourHours" numeric, "labourCost" numeric, "materialCost" numeric,
+        "equipmentCost" numeric, "markupPct" numeric, "totalValue" numeric,
+        "status" text, "notes" text
+      )
+    `;
+  }
+}
+
+const numOrNull = (v: unknown): number | null => (v == null ? null : Number(v));
+const strOrNull = (v: unknown): string | null => (v == null ? null : String(v));
+
+export async function listCostMaterials(): Promise<CostMaterial[]> {
+  await ensureSchema();
+  const rows = (await getSql()`SELECT * FROM cost_materials ORDER BY item_id`) as Row[];
+  return rows.map((r) => ({
+    id: Number(r.id),
+    itemId: strOrNull(r.item_id),
+    category: strOrNull(r.category),
+    subCategory: strOrNull(r.sub_category),
+    description: String(r.description),
+    unit: strOrNull(r.unit),
+    unitCost: numOrNull(r.unit_cost),
+    notes: strOrNull(r.notes),
+  }));
+}
+
+export async function listCostLabour(): Promise<CostLabour[]> {
+  await ensureSchema();
+  const rows = (await getSql()`SELECT * FROM cost_labour ORDER BY trade_id`) as Row[];
+  return rows.map((r) => ({
+    id: Number(r.id),
+    tradeId: strOrNull(r.trade_id),
+    trade: strOrNull(r.trade),
+    classification: strOrNull(r.classification),
+    rateType: strOrNull(r.rate_type),
+    rate: numOrNull(r.rate),
+    otRate: numOrNull(r.ot_rate),
+    notes: strOrNull(r.notes),
+  }));
+}
+
+export async function listCostEquipment(): Promise<CostEquipment[]> {
+  await ensureSchema();
+  const rows = (await getSql()`SELECT * FROM cost_equipment ORDER BY equip_id`) as Row[];
+  return rows.map((r) => ({
+    id: Number(r.id),
+    equipId: strOrNull(r.equip_id),
+    category: strOrNull(r.category),
+    description: String(r.description),
+    rateType: strOrNull(r.rate_type),
+    rate: numOrNull(r.rate),
+    notes: strOrNull(r.notes),
+  }));
+}
+
+export async function listHistoricalChangeOrders(): Promise<
+  HistoricalChangeOrder[]
+> {
+  await ensureSchema();
+  const rows =
+    (await getSql()`SELECT * FROM historical_change_orders ORDER BY co_ref`) as Row[];
+  return rows.map((r) => ({
+    id: Number(r.id),
+    coRef: strOrNull(r.co_ref),
+    project: strOrNull(r.project),
+    description: String(r.description),
+    category: strOrNull(r.category),
+    labourHours: numOrNull(r.labour_hours),
+    labourCost: numOrNull(r.labour_cost),
+    materialCost: numOrNull(r.material_cost),
+    equipmentCost: numOrNull(r.equipment_cost),
+    markupPct: numOrNull(r.markup_pct),
+    totalValue: numOrNull(r.total_value),
+    status: strOrNull(r.status),
+    notes: strOrNull(r.notes),
+  }));
 }

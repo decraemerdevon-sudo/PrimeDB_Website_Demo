@@ -92,3 +92,53 @@ export interface NewChangeOrderInput {
   reviewStatus?: ReviewStatus;
   reviewFlags?: ReviewFlag[];
 }
+
+// ---- Cost database (rate catalog + historical reference) ----
+
+export interface CostMaterial {
+  id: number;
+  itemId: string | null;
+  category: string | null;
+  subCategory: string | null;
+  description: string;
+  unit: string | null;
+  unitCost: number | null;
+  notes: string | null;
+}
+
+export interface CostLabour {
+  id: number;
+  tradeId: string | null;
+  trade: string | null;
+  classification: string | null;
+  rateType: string | null;
+  rate: number | null;
+  otRate: number | null;
+  notes: string | null;
+}
+
+export interface CostEquipment {
+  id: number;
+  equipId: string | null;
+  category: string | null;
+  description: string;
+  rateType: string | null;
+  rate: number | null;
+  notes: string | null;
+}
+
+export interface HistoricalChangeOrder {
+  id: number;
+  coRef: string | null;
+  project: string | null;
+  description: string;
+  category: string | null;
+  labourHours: number | null;
+  labourCost: number | null;
+  materialCost: number | null;
+  equipmentCost: number | null;
+  markupPct: number | null;
+  totalValue: number | null;
+  status: string | null;
+  notes: string | null;
+}

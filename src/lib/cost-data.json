@@ -1,0 +1,1150 @@
+{
+  "materials": [
+    {
+      "itemId": "MAT-001",
+      "category": "Concrete & Masonry",
+      "subCategory": "Concrete",
+      "description": "Ready-mix concrete (25 MPa)",
+      "unit": "m³",
+      "unitCost": 195,
+      "notes": "Standard residential/commercial"
+    },
+    {
+      "itemId": "MAT-002",
+      "category": "Concrete & Masonry",
+      "subCategory": "Concrete",
+      "description": "Ready-mix concrete (30 MPa)",
+      "unit": "m³",
+      "unitCost": 215,
+      "notes": "Higher strength applications"
+    },
+    {
+      "itemId": "MAT-003",
+      "category": "Concrete & Masonry",
+      "subCategory": "Concrete",
+      "description": "Concrete pump rental",
+      "unit": "hr",
+      "unitCost": 185,
+      "notes": "Includes operator"
+    },
+    {
+      "itemId": "MAT-004",
+      "category": "Concrete & Masonry",
+      "subCategory": "Masonry",
+      "description": "Standard concrete block (20cm)",
+      "unit": "each",
+      "unitCost": 4.5,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-005",
+      "category": "Concrete & Masonry",
+      "subCategory": "Masonry",
+      "description": "Brick (modular)",
+      "unit": "each",
+      "unitCost": 1.2,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-006",
+      "category": "Concrete & Masonry",
+      "subCategory": "Formwork",
+      "description": "Plywood formwork (19mm)",
+      "unit": "sheet",
+      "unitCost": 65,
+      "notes": "Reusable up to 5x"
+    },
+    {
+      "itemId": "MAT-007",
+      "category": "Framing",
+      "subCategory": "Wood",
+      "description": "2x4 SPF stud (8ft)",
+      "unit": "each",
+      "unitCost": 7.5,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-008",
+      "category": "Framing",
+      "subCategory": "Wood",
+      "description": "2x6 SPF (8ft)",
+      "unit": "each",
+      "unitCost": 11,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-009",
+      "category": "Framing",
+      "subCategory": "Wood",
+      "description": "LVL beam (3.5\"x9.5\")",
+      "unit": "lft",
+      "unitCost": 18.5,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-010",
+      "category": "Framing",
+      "subCategory": "Steel",
+      "description": "W150x24 wide flange beam",
+      "unit": "lft",
+      "unitCost": 42,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-011",
+      "category": "Framing",
+      "subCategory": "Steel",
+      "description": "HSS 102x102x6.4 column",
+      "unit": "lft",
+      "unitCost": 38,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-012",
+      "category": "Framing",
+      "subCategory": "Fasteners",
+      "description": "Framing nails (3.5\", 1lb box)",
+      "unit": "box",
+      "unitCost": 14,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-013",
+      "category": "Roofing",
+      "subCategory": "Shingles",
+      "description": "Asphalt shingles (30yr architectural)",
+      "unit": "square",
+      "unitCost": 120,
+      "notes": "Per 100 sq ft"
+    },
+    {
+      "itemId": "MAT-014",
+      "category": "Roofing",
+      "subCategory": "Shingles",
+      "description": "Underlayment (15lb felt)",
+      "unit": "roll",
+      "unitCost": 45,
+      "notes": "200 sq ft roll"
+    },
+    {
+      "itemId": "MAT-015",
+      "category": "Roofing",
+      "subCategory": "Flat Roof",
+      "description": "EPDM membrane (60mil)",
+      "unit": "sq ft",
+      "unitCost": 4.2,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-016",
+      "category": "Roofing",
+      "subCategory": "Flat Roof",
+      "description": "TPO membrane",
+      "unit": "sq ft",
+      "unitCost": 3.8,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-017",
+      "category": "Roofing",
+      "subCategory": "Insulation",
+      "description": "Rigid insulation (2\" polyiso)",
+      "unit": "sq ft",
+      "unitCost": 1.85,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-018",
+      "category": "Electrical",
+      "subCategory": "Wiring",
+      "description": "14/2 NMD90 wire",
+      "unit": "m",
+      "unitCost": 1.8,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-019",
+      "category": "Electrical",
+      "subCategory": "Wiring",
+      "description": "12/2 NMD90 wire",
+      "unit": "m",
+      "unitCost": 2.4,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-020",
+      "category": "Electrical",
+      "subCategory": "Wiring",
+      "description": "12/3 NMD90 wire",
+      "unit": "m",
+      "unitCost": 3.1,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-021",
+      "category": "Electrical",
+      "subCategory": "Devices",
+      "description": "Standard outlet (15A)",
+      "unit": "each",
+      "unitCost": 8.5,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-022",
+      "category": "Electrical",
+      "subCategory": "Devices",
+      "description": "GFCI outlet (15A)",
+      "unit": "each",
+      "unitCost": 28,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-023",
+      "category": "Electrical",
+      "subCategory": "Devices",
+      "description": "Single pole breaker (15A)",
+      "unit": "each",
+      "unitCost": 18,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-024",
+      "category": "Electrical",
+      "subCategory": "Fixtures",
+      "description": "Pot light (LED 4\")",
+      "unit": "each",
+      "unitCost": 45,
+      "notes": "Includes trim"
+    },
+    {
+      "itemId": "MAT-025",
+      "category": "Electrical",
+      "subCategory": "Panel",
+      "description": "200A main panel",
+      "unit": "each",
+      "unitCost": 850,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-026",
+      "category": "Plumbing",
+      "subCategory": "Pipe",
+      "description": "1/2\" copper pipe",
+      "unit": "lft",
+      "unitCost": 6.2,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-027",
+      "category": "Plumbing",
+      "subCategory": "Pipe",
+      "description": "3/4\" copper pipe",
+      "unit": "lft",
+      "unitCost": 9.8,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-028",
+      "category": "Plumbing",
+      "subCategory": "Pipe",
+      "description": "4\" ABS drain pipe",
+      "unit": "lft",
+      "unitCost": 5.4,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-029",
+      "category": "Plumbing",
+      "subCategory": "Fixtures",
+      "description": "Standard toilet",
+      "unit": "each",
+      "unitCost": 380,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-030",
+      "category": "Plumbing",
+      "subCategory": "Fixtures",
+      "description": "Standard bathtub",
+      "unit": "each",
+      "unitCost": 650,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-031",
+      "category": "Plumbing",
+      "subCategory": "Fixtures",
+      "description": "Undermount sink (kitchen)",
+      "unit": "each",
+      "unitCost": 420,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-032",
+      "category": "Plumbing",
+      "subCategory": "Water Heater",
+      "description": "50gal electric hot water tank",
+      "unit": "each",
+      "unitCost": 1200,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-033",
+      "category": "HVAC",
+      "subCategory": "Ductwork",
+      "description": "6\" round duct",
+      "unit": "lft",
+      "unitCost": 8.5,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-034",
+      "category": "HVAC",
+      "subCategory": "Ductwork",
+      "description": "8\" round duct",
+      "unit": "lft",
+      "unitCost": 12,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-035",
+      "category": "HVAC",
+      "subCategory": "Equipment",
+      "description": "2-ton split AC unit",
+      "unit": "each",
+      "unitCost": 3200,
+      "notes": "Supply only"
+    },
+    {
+      "itemId": "MAT-036",
+      "category": "HVAC",
+      "subCategory": "Equipment",
+      "description": "Gas furnace (80k BTU)",
+      "unit": "each",
+      "unitCost": 2800,
+      "notes": "Supply only"
+    },
+    {
+      "itemId": "MAT-037",
+      "category": "HVAC",
+      "subCategory": "Equipment",
+      "description": "HRV unit",
+      "unit": "each",
+      "unitCost": 1800,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-038",
+      "category": "HVAC",
+      "subCategory": "Insulation",
+      "description": "R20 batt insulation (2x6 wall)",
+      "unit": "sq ft",
+      "unitCost": 1.1,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-039",
+      "category": "HVAC",
+      "subCategory": "Insulation",
+      "description": "R50 blown attic insulation",
+      "unit": "sq ft",
+      "unitCost": 2.2,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-040",
+      "category": "Doors & Windows",
+      "subCategory": "Doors",
+      "description": "Standard interior door (32\")",
+      "unit": "each",
+      "unitCost": 180,
+      "notes": "Slab only"
+    },
+    {
+      "itemId": "MAT-041",
+      "category": "Doors & Windows",
+      "subCategory": "Doors",
+      "description": "Exterior steel door (36\")",
+      "unit": "each",
+      "unitCost": 650,
+      "notes": "Pre-hung"
+    },
+    {
+      "itemId": "MAT-042",
+      "category": "Doors & Windows",
+      "subCategory": "Windows",
+      "description": "Double hung vinyl window (36x48)",
+      "unit": "each",
+      "unitCost": 420,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-043",
+      "category": "Doors & Windows",
+      "subCategory": "Windows",
+      "description": "Sliding patio door (6ft)",
+      "unit": "each",
+      "unitCost": 1800,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-044",
+      "category": "Finishes",
+      "subCategory": "Drywall",
+      "description": "1/2\" drywall (4x8 sheet)",
+      "unit": "sheet",
+      "unitCost": 18.5,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-045",
+      "category": "Finishes",
+      "subCategory": "Drywall",
+      "description": "5/8\" fire-rated drywall",
+      "unit": "sheet",
+      "unitCost": 24,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-046",
+      "category": "Finishes",
+      "subCategory": "Flooring",
+      "description": "Hardwood flooring (3\" oak)",
+      "unit": "sq ft",
+      "unitCost": 8.5,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-047",
+      "category": "Finishes",
+      "subCategory": "Flooring",
+      "description": "Ceramic tile (12x12)",
+      "unit": "sq ft",
+      "unitCost": 4.2,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-048",
+      "category": "Finishes",
+      "subCategory": "Flooring",
+      "description": "LVP flooring",
+      "unit": "sq ft",
+      "unitCost": 5.8,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-049",
+      "category": "Finishes",
+      "subCategory": "Paint",
+      "description": "Interior latex paint (premium)",
+      "unit": "L",
+      "unitCost": 18,
+      "notes": null
+    },
+    {
+      "itemId": "MAT-050",
+      "category": "Finishes",
+      "subCategory": "Paint",
+      "description": "Exterior paint (premium)",
+      "unit": "L",
+      "unitCost": 24,
+      "notes": null
+    }
+  ],
+  "labour": [
+    {
+      "tradeId": "LAB-001",
+      "trade": "General Labour",
+      "classification": "Labourer",
+      "rateType": "Straight Time",
+      "rate": 38,
+      "otRate": 57,
+      "notes": "Standard site labour"
+    },
+    {
+      "tradeId": "LAB-002",
+      "trade": "General Labour",
+      "classification": "Lead Hand",
+      "rateType": "Straight Time",
+      "rate": 48,
+      "otRate": 72,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-003",
+      "trade": "General Labour",
+      "classification": "Foreman",
+      "rateType": "Straight Time",
+      "rate": 62,
+      "otRate": 93,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-004",
+      "trade": "Carpentry",
+      "classification": "Apprentice Carpenter",
+      "rateType": "Straight Time",
+      "rate": 42,
+      "otRate": 63,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-005",
+      "trade": "Carpentry",
+      "classification": "Journeyman Carpenter",
+      "rateType": "Straight Time",
+      "rate": 58,
+      "otRate": 87,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-006",
+      "trade": "Carpentry",
+      "classification": "Master Carpenter",
+      "rateType": "Straight Time",
+      "rate": 72,
+      "otRate": 108,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-007",
+      "trade": "Electrical",
+      "classification": "Apprentice Electrician",
+      "rateType": "Straight Time",
+      "rate": 45,
+      "otRate": 68,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-008",
+      "trade": "Electrical",
+      "classification": "Journeyman Electrician",
+      "rateType": "Straight Time",
+      "rate": 72,
+      "otRate": 108,
+      "notes": "Licensed"
+    },
+    {
+      "tradeId": "LAB-009",
+      "trade": "Electrical",
+      "classification": "Master Electrician",
+      "rateType": "Straight Time",
+      "rate": 92,
+      "otRate": 138,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-010",
+      "trade": "Plumbing",
+      "classification": "Apprentice Plumber",
+      "rateType": "Straight Time",
+      "rate": 44,
+      "otRate": 66,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-011",
+      "trade": "Plumbing",
+      "classification": "Journeyman Plumber",
+      "rateType": "Straight Time",
+      "rate": 74,
+      "otRate": 111,
+      "notes": "Licensed"
+    },
+    {
+      "tradeId": "LAB-012",
+      "trade": "Plumbing",
+      "classification": "Master Plumber",
+      "rateType": "Straight Time",
+      "rate": 95,
+      "otRate": 143,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-013",
+      "trade": "HVAC",
+      "classification": "HVAC Technician",
+      "rateType": "Straight Time",
+      "rate": 68,
+      "otRate": 102,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-014",
+      "trade": "HVAC",
+      "classification": "HVAC Lead",
+      "rateType": "Straight Time",
+      "rate": 82,
+      "otRate": 123,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-015",
+      "trade": "Concrete",
+      "classification": "Concrete Finisher",
+      "rateType": "Straight Time",
+      "rate": 52,
+      "otRate": 78,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-016",
+      "trade": "Concrete",
+      "classification": "Concrete Foreman",
+      "rateType": "Straight Time",
+      "rate": 68,
+      "otRate": 102,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-017",
+      "trade": "Ironwork",
+      "classification": "Ironworker",
+      "rateType": "Straight Time",
+      "rate": 75,
+      "otRate": 113,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-018",
+      "trade": "Ironwork",
+      "classification": "Ironwork Foreman",
+      "rateType": "Straight Time",
+      "rate": 88,
+      "otRate": 132,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-019",
+      "trade": "Roofing",
+      "classification": "Roofer",
+      "rateType": "Straight Time",
+      "rate": 55,
+      "otRate": 83,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-020",
+      "trade": "Roofing",
+      "classification": "Roofing Foreman",
+      "rateType": "Straight Time",
+      "rate": 70,
+      "otRate": 105,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-021",
+      "trade": "Drywall",
+      "classification": "Drywall Installer",
+      "rateType": "Straight Time",
+      "rate": 50,
+      "otRate": 75,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-022",
+      "trade": "Drywall",
+      "classification": "Drywall Finisher",
+      "rateType": "Straight Time",
+      "rate": 55,
+      "otRate": 83,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-023",
+      "trade": "Painting",
+      "classification": "Painter",
+      "rateType": "Straight Time",
+      "rate": 48,
+      "otRate": 72,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-024",
+      "trade": "Painting",
+      "classification": "Lead Painter",
+      "rateType": "Straight Time",
+      "rate": 60,
+      "otRate": 90,
+      "notes": null
+    },
+    {
+      "tradeId": "LAB-025",
+      "trade": "Project Mgmt",
+      "classification": "Site Superintendent",
+      "rateType": "Salary",
+      "rate": 95,
+      "otRate": null,
+      "notes": "Day rate approx $760"
+    },
+    {
+      "tradeId": "LAB-026",
+      "trade": "Project Mgmt",
+      "classification": "Project Manager",
+      "rateType": "Salary",
+      "rate": 110,
+      "otRate": null,
+      "notes": "Day rate approx $880"
+    }
+  ],
+  "equipment": [
+    {
+      "equipId": "EQ-001",
+      "category": "Lifting",
+      "description": "Mobile crane (50 ton)",
+      "rateType": "Daily",
+      "rate": 2800,
+      "notes": "Includes operator"
+    },
+    {
+      "equipId": "EQ-002",
+      "category": "Lifting",
+      "description": "Telehandler",
+      "rateType": "Daily",
+      "rate": 950,
+      "notes": "Excludes operator"
+    },
+    {
+      "equipId": "EQ-003",
+      "category": "Lifting",
+      "description": "Scissor lift (19ft)",
+      "rateType": "Daily",
+      "rate": 320,
+      "notes": null
+    },
+    {
+      "equipId": "EQ-004",
+      "category": "Lifting",
+      "description": "Boom lift (40ft)",
+      "rateType": "Daily",
+      "rate": 580,
+      "notes": null
+    },
+    {
+      "equipId": "EQ-005",
+      "category": "Lifting",
+      "description": "Construction hoist",
+      "rateType": "Monthly",
+      "rate": 8500,
+      "notes": "Includes install"
+    },
+    {
+      "equipId": "EQ-006",
+      "category": "Excavation",
+      "description": "Excavator (20 ton)",
+      "rateType": "Daily",
+      "rate": 1800,
+      "notes": "Excludes operator"
+    },
+    {
+      "equipId": "EQ-007",
+      "category": "Excavation",
+      "description": "Mini excavator",
+      "rateType": "Daily",
+      "rate": 650,
+      "notes": "Excludes operator"
+    },
+    {
+      "equipId": "EQ-008",
+      "category": "Excavation",
+      "description": "Skid steer",
+      "rateType": "Daily",
+      "rate": 480,
+      "notes": "Excludes operator"
+    },
+    {
+      "equipId": "EQ-009",
+      "category": "Excavation",
+      "description": "Dump truck (10 wheel)",
+      "rateType": "Daily",
+      "rate": 850,
+      "notes": "Includes driver"
+    },
+    {
+      "equipId": "EQ-010",
+      "category": "Concrete",
+      "description": "Concrete pump truck",
+      "rateType": "Daily",
+      "rate": 2200,
+      "notes": "Includes operator"
+    },
+    {
+      "equipId": "EQ-011",
+      "category": "Concrete",
+      "description": "Concrete mixer (portable)",
+      "rateType": "Daily",
+      "rate": 180,
+      "notes": null
+    },
+    {
+      "equipId": "EQ-012",
+      "category": "Concrete",
+      "description": "Power screed",
+      "rateType": "Daily",
+      "rate": 95,
+      "notes": null
+    },
+    {
+      "equipId": "EQ-013",
+      "category": "Compaction",
+      "description": "Plate compactor",
+      "rateType": "Daily",
+      "rate": 120,
+      "notes": null
+    },
+    {
+      "equipId": "EQ-014",
+      "category": "Compaction",
+      "description": "Jumping jack",
+      "rateType": "Daily",
+      "rate": 85,
+      "notes": null
+    },
+    {
+      "equipId": "EQ-015",
+      "category": "Temporary",
+      "description": "Site trailer (office)",
+      "rateType": "Monthly",
+      "rate": 650,
+      "notes": null
+    },
+    {
+      "equipId": "EQ-016",
+      "category": "Temporary",
+      "description": "Portable toilet",
+      "rateType": "Monthly",
+      "rate": 180,
+      "notes": null
+    },
+    {
+      "equipId": "EQ-017",
+      "category": "Temporary",
+      "description": "Construction fence (per panel)",
+      "rateType": "Monthly",
+      "rate": 18,
+      "notes": null
+    },
+    {
+      "equipId": "EQ-018",
+      "category": "Temporary",
+      "description": "Generator (50kW)",
+      "rateType": "Daily",
+      "rate": 380,
+      "notes": null
+    },
+    {
+      "equipId": "EQ-019",
+      "category": "Temporary",
+      "description": "Temporary power hookup",
+      "rateType": "Lump Sum",
+      "rate": 2400,
+      "notes": "Permit included"
+    },
+    {
+      "equipId": "EQ-020",
+      "category": "Tools",
+      "description": "Concrete saw",
+      "rateType": "Daily",
+      "rate": 220,
+      "notes": null
+    },
+    {
+      "equipId": "EQ-021",
+      "category": "Tools",
+      "description": "Core drill rig",
+      "rateType": "Daily",
+      "rate": 280,
+      "notes": null
+    },
+    {
+      "equipId": "EQ-022",
+      "category": "Tools",
+      "description": "Powder actuated tool",
+      "rateType": "Daily",
+      "rate": 45,
+      "notes": null
+    }
+  ],
+  "historical": [
+    {
+      "coRef": "CO-001",
+      "project": "King St Reno",
+      "description": "Add pot lights in basement (12 fixtures)",
+      "category": "Electrical",
+      "labourHours": 8,
+      "labourCost": 576,
+      "materialCost": 540,
+      "equipmentCost": 0,
+      "markupPct": 15,
+      "totalValue": 1282,
+      "status": "Approved",
+      "notes": "Client requested day of framing inspection"
+    },
+    {
+      "coRef": "CO-002",
+      "project": "King St Reno",
+      "description": "Upgrade kitchen countertop to quartz",
+      "category": "Finishes",
+      "labourHours": 6,
+      "labourCost": 348,
+      "materialCost": 2200,
+      "equipmentCost": 0,
+      "markupPct": 15,
+      "totalValue": 2932,
+      "status": "Approved",
+      "notes": "Original spec was laminate"
+    },
+    {
+      "coRef": "CO-003",
+      "project": "Oakville Addition",
+      "description": "Extend deck by 8ft",
+      "category": "Carpentry",
+      "labourHours": 16,
+      "labourCost": 928,
+      "materialCost": 1850,
+      "equipmentCost": 0,
+      "markupPct": 15,
+      "totalValue": 3191,
+      "status": "Approved",
+      "notes": "Client changed mind after permit"
+    },
+    {
+      "coRef": "CO-004",
+      "project": "Oakville Addition",
+      "description": "Relocate powder room door",
+      "category": "Carpentry",
+      "labourHours": 10,
+      "labourCost": 580,
+      "materialCost": 320,
+      "equipmentCost": 0,
+      "markupPct": 15,
+      "totalValue": 1035,
+      "status": "Approved",
+      "notes": "Conflict with furniture layout"
+    },
+    {
+      "coRef": "CO-005",
+      "project": "Mississauga Office",
+      "description": "Add server room cooling unit",
+      "category": "HVAC",
+      "labourHours": 12,
+      "labourCost": 816,
+      "materialCost": 3200,
+      "equipmentCost": 480,
+      "markupPct": 15,
+      "totalValue": 5175,
+      "status": "Approved",
+      "notes": "IT requirement discovered late"
+    },
+    {
+      "coRef": "CO-006",
+      "project": "Mississauga Office",
+      "description": "Upgrade to commercial grade flooring",
+      "category": "Finishes",
+      "labourHours": 8,
+      "labourCost": 400,
+      "materialCost": 4800,
+      "equipmentCost": 0,
+      "markupPct": 15,
+      "totalValue": 5980,
+      "status": "Approved",
+      "notes": null
+    },
+    {
+      "coRef": "CO-007",
+      "project": "Etobicoke Townhomes",
+      "description": "Add gas line to back patio x4 units",
+      "category": "Plumbing",
+      "labourHours": 20,
+      "labourCost": 1480,
+      "materialCost": 1200,
+      "equipmentCost": 0,
+      "markupPct": 15,
+      "totalValue": 3082,
+      "status": "Approved",
+      "notes": "Client requested post-framing"
+    },
+    {
+      "coRef": "CO-008",
+      "project": "Etobicoke Townhomes",
+      "description": "Upgrade windows to triple pane x4 units",
+      "category": "Doors & Windows",
+      "labourHours": 16,
+      "labourCost": 928,
+      "materialCost": 8400,
+      "equipmentCost": 0,
+      "markupPct": 15,
+      "totalValue": 10724,
+      "status": "Approved",
+      "notes": "Energy upgrade"
+    },
+    {
+      "coRef": "CO-009",
+      "project": "Etobicoke Townhomes",
+      "description": "Additional electrical outlets in garage x4",
+      "category": "Electrical",
+      "labourHours": 12,
+      "labourCost": 864,
+      "materialCost": 480,
+      "equipmentCost": 0,
+      "markupPct": 15,
+      "totalValue": 1546,
+      "status": "Approved",
+      "notes": "EV charger prep"
+    },
+    {
+      "coRef": "CO-010",
+      "project": "North York Reno",
+      "description": "Remove load bearing wall (unexpected)",
+      "category": "Structural",
+      "labourHours": 24,
+      "labourCost": 1728,
+      "materialCost": 3800,
+      "equipmentCost": 600,
+      "markupPct": 20,
+      "totalValue": 7354,
+      "status": "Approved",
+      "notes": "Hidden during demo"
+    },
+    {
+      "coRef": "CO-011",
+      "project": "North York Reno",
+      "description": "Upgrade bathroom tile to marble",
+      "category": "Finishes",
+      "labourHours": 10,
+      "labourCost": 500,
+      "materialCost": 6500,
+      "equipmentCost": 0,
+      "markupPct": 15,
+      "totalValue": 8050,
+      "status": "Approved",
+      "notes": null
+    },
+    {
+      "coRef": "CO-012",
+      "project": "Brampton Industrial",
+      "description": "Add mezzanine level",
+      "category": "Structural",
+      "labourHours": 80,
+      "labourCost": 6000,
+      "materialCost": 28000,
+      "equipmentCost": 4500,
+      "markupPct": 15,
+      "totalValue": 44275,
+      "status": "Approved",
+      "notes": "Scope added post-permit"
+    },
+    {
+      "coRef": "CO-013",
+      "project": "Brampton Industrial",
+      "description": "Upgrade electrical to 600V service",
+      "category": "Electrical",
+      "labourHours": 40,
+      "labourCost": 2880,
+      "materialCost": 18500,
+      "equipmentCost": 0,
+      "markupPct": 15,
+      "totalValue": 24564,
+      "status": "Approved",
+      "notes": "Tenant requirement"
+    },
+    {
+      "coRef": "CO-014",
+      "project": "Scarborough Reno",
+      "description": "Soundproofing between units",
+      "category": "Finishes",
+      "labourHours": 20,
+      "labourCost": 1000,
+      "materialCost": 3200,
+      "equipmentCost": 0,
+      "markupPct": 15,
+      "totalValue": 4830,
+      "status": "Approved",
+      "notes": "Neighbour complaint"
+    },
+    {
+      "coRef": "CO-015",
+      "project": "Scarborough Reno",
+      "description": "Add central vac system",
+      "category": "HVAC",
+      "labourHours": 8,
+      "labourCost": 544,
+      "materialCost": 1800,
+      "equipmentCost": 0,
+      "markupPct": 15,
+      "totalValue": 2693,
+      "status": "Pending Signature",
+      "notes": "Quoted but not yet approved"
+    },
+    {
+      "coRef": "CO-016",
+      "project": "Burlington Build",
+      "description": "Change roof from flat to sloped",
+      "category": "Roofing",
+      "labourHours": 60,
+      "labourCost": 3300,
+      "materialCost": 22000,
+      "equipmentCost": 2800,
+      "markupPct": 15,
+      "totalValue": 32315,
+      "status": "Approved",
+      "notes": "Major scope change"
+    },
+    {
+      "coRef": "CO-017",
+      "project": "Burlington Build",
+      "description": "Add in-floor heating to master bath",
+      "category": "HVAC",
+      "labourHours": 12,
+      "labourCost": 816,
+      "materialCost": 2400,
+      "equipmentCost": 0,
+      "markupPct": 15,
+      "totalValue": 3698,
+      "status": "Approved",
+      "notes": null
+    },
+    {
+      "coRef": "CO-018",
+      "project": "Hamilton Reno",
+      "description": "Asbestos abatement (discovered)",
+      "category": "Remediation",
+      "labourHours": 32,
+      "labourCost": 1920,
+      "materialCost": 8500,
+      "equipmentCost": 1200,
+      "markupPct": 20,
+      "totalValue": 14544,
+      "status": "Approved",
+      "notes": "Unforeseen condition"
+    },
+    {
+      "coRef": "CO-019",
+      "project": "Hamilton Reno",
+      "description": "Upgrade panel to 200A",
+      "category": "Electrical",
+      "labourHours": 16,
+      "labourCost": 1152,
+      "materialCost": 850,
+      "equipmentCost": 0,
+      "markupPct": 15,
+      "totalValue": 2300,
+      "status": "Approved",
+      "notes": "Existing was 100A"
+    },
+    {
+      "coRef": "CO-020",
+      "project": "Ancaster New Build",
+      "description": "Add finished basement",
+      "category": "Carpentry",
+      "labourHours": 120,
+      "labourCost": 6960,
+      "materialCost": 32000,
+      "equipmentCost": 0,
+      "markupPct": 15,
+      "totalValue": 44804,
+      "status": "Pending Signature",
+      "notes": "Large scope addition"
+    }
+  ]
+}
