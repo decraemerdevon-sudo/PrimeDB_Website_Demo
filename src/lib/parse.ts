@@ -1,6 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { APPROVAL_STATUSES, type ParsedChangeOrder } from "./types";
+import {
+  APPROVAL_STATUSES,
+  FLAGGABLE_FIELDS,
+  type ParsedChangeOrder,
+} from "./types";
 
 // Haiku is the cheapest model and is plenty for this scoped extraction task.
 // Swap to "claude-sonnet-4-6" or "claude-opus-4-8" for higher-quality parsing.
@@ -23,7 +27,9 @@ Extraction rules:
 - approvalStatus: "Verbal" if approved verbally/over the phone/in person, "Written" if approved in writing/email/signed, "Pending" if awaiting a decision, "None" if approval is not mentioned.
 - initiator: who requested or approved the change (e.g. "Client", a person's name, "Architect"). null if not identifiable.
 - requestDate: an ISO date (yyyy-mm-dd) if a specific date is stated; otherwise null. Do not guess.
-- projectName: the project, building, or site the work relates to, exactly as referenced. If none is identifiable, use an empty string.`;
+- projectName: the project, building, or site the work relates to, exactly as referenced. Use an empty string if none is identifiable.
+
+reviewFlags: list every field whose value is MISSING from the input or that you are UNSURE about, so a human reviewer knows what to confirm. For each, give the field name and a short, specific note (e.g. "No cost mentioned", "Approval not stated — please confirm", "No project named"). Only flag genuine gaps or ambiguities; do not flag fields you extracted confidently. Allowed field names: ${FLAGGABLE_FIELDS.join(", ")}.`;
 
 // JSON schema for structured outputs (no min/max constraints — unsupported).
 const OUTPUT_SCHEMA = {
@@ -36,6 +42,18 @@ const OUTPUT_SCHEMA = {
     approvalStatus: { type: "string", enum: APPROVAL_STATUSES },
     initiator: { type: ["string", "null"] },
     requestDate: { type: ["string", "null"] },
+    reviewFlags: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          field: { type: "string", enum: FLAGGABLE_FIELDS },
+          note: { type: "string" },
+        },
+        required: ["field", "note"],
+      },
+    },
   },
   required: [
     "projectName",
@@ -44,6 +62,7 @@ const OUTPUT_SCHEMA = {
     "approvalStatus",
     "initiator",
     "requestDate",
+    "reviewFlags",
   ],
 } as const;
 
@@ -54,6 +73,9 @@ const ParsedSchema = z.object({
   approvalStatus: z.enum(APPROVAL_STATUSES),
   initiator: z.string().nullable(),
   requestDate: z.string().nullable(),
+  reviewFlags: z.array(
+    z.object({ field: z.enum(FLAGGABLE_FIELDS), note: z.string() }),
+  ),
 });
 
 export async function parseChangeOrder(

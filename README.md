@@ -33,6 +33,25 @@ Two environment variables are required for the live app:
 
 The database schema is created automatically on first use, along with a few sample projects so the dashboard works immediately. Without `DATABASE_URL`, the app shows a setup notice instead of crashing; without `ANTHROPIC_API_KEY`, you can still fill in change-order fields manually.
 
+### Email auto-ingest (optional)
+
+The app can watch a Gmail label, parse change-order emails with AI, and drop them into the **Needs Review** queue (it never creates a live change order without a human approving). Auto-ingest stays off until these are set:
+
+| Variable | What it's for |
+|---|---|
+| `GMAIL_IMAP_USER` | The Gmail address to read (e.g. `you@gmail.com`). |
+| `GMAIL_IMAP_APP_PASSWORD` | A Google **App Password** (not your normal password). Requires 2-Step Verification enabled. |
+| `GMAIL_INGEST_LABEL` | Optional. Label to read. Default `ChangeOrders/Inbox`. |
+| `GMAIL_PROCESSED_LABEL` | Optional. Label to move handled mail into. Default `ChangeOrders/Processed`. |
+| `CRON_SECRET` | Optional. If set, the `/api/ingest/email` cron endpoint requires `Authorization: Bearer <CRON_SECRET>`. |
+
+**Gmail setup (one time):**
+1. Enable **2-Step Verification**, then create an **App Password** (Google Account → Security → App passwords) and put it in `GMAIL_IMAP_APP_PASSWORD`.
+2. Make sure **IMAP is enabled** (Gmail → Settings → Forwarding and POP/IMAP).
+3. Create a label `ChangeOrders/Inbox` and a **filter** that applies it to change-order emails (e.g. addressed to a `+co` alias, or matching a keyword). The app only ever reads this label — never your whole inbox.
+
+Ingestion runs on a schedule (`vercel.json` → `crons`; note the Vercel Hobby plan limits cron to once/day — use an external scheduler or upgrade for more frequent polling) and can be triggered any time with the **Check email now** button on the dashboard.
+
 ### Local development
 
 ```bash
