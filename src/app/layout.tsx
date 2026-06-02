@@ -46,6 +46,12 @@ export default function RootLayout({
                 Dashboard
               </Link>
               <Link
+                href="/cost-database"
+                className="text-zinc-600 hover:text-[#0F2942]"
+              >
+                Cost Database
+              </Link>
+              <Link
                 href="/change-orders/new"
                 className="rounded-md bg-[#0F2942] px-3 py-1.5 font-medium text-white hover:bg-[#1b3d5e]"
               >
