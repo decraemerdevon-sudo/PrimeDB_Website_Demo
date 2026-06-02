@@ -4,8 +4,35 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { confirmChangeOrder, createChangeOrder } from "./db";
 import { runEmailIngest, type IngestResult } from "./email-ingest";
+import { generateEstimate } from "./estimate";
 import { MissingApiKeyError, parseChangeOrder } from "./parse";
-import type { NewChangeOrderInput, ParsedChangeOrder } from "./types";
+import type { Estimate, NewChangeOrderInput, ParsedChangeOrder } from "./types";
+
+export type EstimateResult =
+  | { ok: true; estimate: Estimate }
+  | { ok: false; error: string };
+
+export async function generateEstimateAction(
+  scope: string,
+): Promise<EstimateResult> {
+  const text = scope?.trim();
+  if (!text) {
+    return { ok: false, error: "Add a scope of work first, then generate an estimate." };
+  }
+  try {
+    const estimate = await generateEstimate(text);
+    return { ok: true, estimate };
+  } catch (err) {
+    if (err instanceof MissingApiKeyError) {
+      return {
+        ok: false,
+        error: "AI isn't configured yet (set ANTHROPIC_API_KEY). You can enter an estimate manually.",
+      };
+    }
+    console.error("generateEstimateAction failed:", err);
+    return { ok: false, error: "Couldn't generate an estimate. Please try again." };
+  }
+}
 
 export type ParseResult =
   | { ok: true; data: ParsedChangeOrder }
