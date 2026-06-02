@@ -130,6 +130,7 @@ export async function runEmailIngest(): Promise<IngestResult> {
             projectName: matched ? matched.name : parsed.projectName,
             scopeDescription: parsed.scopeDescription,
             costAmount: parsed.costAmount,
+            clientQuotedAmount: parsed.costAmount,
             approvalStatus: parsed.approvalStatus,
             initiator: parsed.initiator,
             requestDate: parsed.requestDate,

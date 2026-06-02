@@ -4,13 +4,16 @@ import { useMemo, useState, useTransition } from "react";
 import {
   approveChangeOrderAction,
   createChangeOrderAction,
+  generateEstimateAction,
   parseAction,
 } from "@/lib/actions";
+import { formatCurrency } from "@/lib/format";
 import {
   APPROVAL_STATUSES,
   CO_STATUSES,
   type ApprovalStatus,
   type CoStatus,
+  type Estimate,
   type FlaggableField,
   type Project,
   type ReviewFlag,
@@ -32,6 +35,10 @@ export interface FormInitial {
   projectName: string;
   scopeDescription: string;
   costAmount: number | null;
+  clientQuotedAmount: number | null;
+  estimatedAmount: number | null;
+  estimatedBreakdown: Estimate | null;
+  markupPct: number | null;
   approvalStatus: ApprovalStatus;
   initiator: string | null;
   requestDate: string | null;
@@ -75,6 +82,20 @@ export function ChangeOrderForm({
   const [costAmount, setCostAmount] = useState(
     initial?.costAmount != null ? String(initial.costAmount) : "",
   );
+  const [clientQuoted, setClientQuoted] = useState(
+    initial?.clientQuotedAmount != null ? String(initial.clientQuotedAmount) : "",
+  );
+  const [estimatedAmount, setEstimatedAmount] = useState(
+    initial?.estimatedAmount != null ? String(initial.estimatedAmount) : "",
+  );
+  const [estimate, setEstimate] = useState<Estimate | null>(
+    initial?.estimatedBreakdown ?? null,
+  );
+  const [markupPct, setMarkupPct] = useState<number | null>(
+    initial?.markupPct ?? null,
+  );
+  const [estimateError, setEstimateError] = useState<string | null>(null);
+  const [isEstimating, startEstimate] = useTransition();
   const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>(
     initial?.approvalStatus ?? "None",
   );
@@ -93,6 +114,16 @@ export function ChangeOrderForm({
   const [isSubmitting, startSubmit] = useTransition();
 
   const flagList = useMemo(() => Object.entries(flags), [flags]);
+
+  const quotedNum = clientQuoted.trim() === "" ? null : Number(clientQuoted);
+  const estNum = estimatedAmount.trim() === "" ? null : Number(estimatedAmount);
+  const variance =
+    quotedNum != null &&
+    estNum != null &&
+    !Number.isNaN(quotedNum) &&
+    !Number.isNaN(estNum)
+      ? quotedNum - estNum
+      : null;
 
   function matchProject(name: string): Project | undefined {
     const n = name.trim().toLowerCase();
@@ -136,6 +167,8 @@ export function ChangeOrderForm({
       setProjectId(matched ? String(matched.id) : "");
       setProjectName(matched ? matched.name : d.projectName);
       setScopeDescription(d.scopeDescription);
+      // The parsed number is what the client quoted; default the final value to it too.
+      setClientQuoted(d.costAmount == null ? "" : String(d.costAmount));
       setCostAmount(d.costAmount == null ? "" : String(d.costAmount));
       setApprovalStatus(d.approvalStatus);
       setInitiator(d.initiator ?? "");
@@ -143,6 +176,20 @@ export function ChangeOrderForm({
       setStatus("Pending Client Signature");
       setFlags(Object.fromEntries(d.reviewFlags.map((f) => [f.field, f.note])));
       setShowReview(true);
+    });
+  }
+
+  function handleGenerateEstimate() {
+    setEstimateError(null);
+    startEstimate(async () => {
+      const result = await generateEstimateAction(scopeDescription);
+      if (!result.ok) {
+        setEstimateError(result.error);
+        return;
+      }
+      setEstimate(result.estimate);
+      setEstimatedAmount(String(result.estimate.total));
+      setMarkupPct(result.estimate.markupPct);
     });
   }
 
@@ -166,8 +213,12 @@ export function ChangeOrderForm({
       return;
     }
     const cost = costAmount.trim() === "" ? null : Number(costAmount);
-    if (cost != null && Number.isNaN(cost)) {
-      setFormError("Cost must be a number.");
+    const quoted = clientQuoted.trim() === "" ? null : Number(clientQuoted);
+    const estTotal = estimatedAmount.trim() === "" ? null : Number(estimatedAmount);
+    if (
+      [cost, quoted, estTotal].some((v) => v != null && Number.isNaN(v))
+    ) {
+      setFormError("Amounts must be numbers.");
       return;
     }
     const input = {
@@ -175,6 +226,10 @@ export function ChangeOrderForm({
       projectName: projectName.trim(),
       scopeDescription: scopeDescription.trim(),
       costAmount: cost,
+      clientQuotedAmount: quoted,
+      estimatedAmount: estTotal,
+      estimatedBreakdown: estimate,
+      markupPct,
       approvalStatus,
       initiator: initiator.trim() || null,
       requestDate: requestDate || null,
@@ -327,25 +382,161 @@ export function ChangeOrderForm({
             {flagNote("scopeDescription")}
           </div>
 
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="cost" className={labelClass}>
-                Cost amount (CAD)
-              </label>
-              <input
-                id="cost"
-                type="number"
-                min="0"
-                step="0.01"
-                className={fieldClass("costAmount")}
-                value={costAmount}
-                onChange={(e) => {
-                  setCostAmount(e.target.value);
-                  if (e.target.value.trim()) clearFlag("costAmount");
-                }}
-              />
-              {flagNote("costAmount")}
+          {/* Pricing & internal estimate */}
+          <div className="mt-4 rounded-md border border-zinc-200 bg-zinc-50 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold text-[#0F2942]">
+                Pricing &amp; estimate
+              </h3>
+              <button
+                type="button"
+                onClick={handleGenerateEstimate}
+                disabled={isEstimating || !scopeDescription.trim()}
+                className="rounded-md bg-[#0F2942] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#1b3d5e] disabled:opacity-50"
+              >
+                {isEstimating
+                  ? "Estimating…"
+                  : estimate
+                    ? "Re-generate estimate"
+                    : "Generate estimate from cost database"}
+              </button>
             </div>
+            {estimateError && (
+              <p className="mt-2 text-xs text-amber-700">{estimateError}</p>
+            )}
+
+            <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div>
+                <label htmlFor="clientQuoted" className={labelClass}>
+                  Client quoted $
+                </label>
+                <input
+                  id="clientQuoted"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className={`${inputBase} ${inputNormal}`}
+                  value={clientQuoted}
+                  onChange={(e) => setClientQuoted(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="estimatedAmount" className={labelClass}>
+                  Our estimate $
+                </label>
+                <input
+                  id="estimatedAmount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className={`${inputBase} ${inputNormal}`}
+                  value={estimatedAmount}
+                  onChange={(e) => setEstimatedAmount(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="cost" className={labelClass}>
+                  Final CO amount $
+                </label>
+                <input
+                  id="cost"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className={fieldClass("costAmount")}
+                  value={costAmount}
+                  onChange={(e) => {
+                    setCostAmount(e.target.value);
+                    if (e.target.value.trim()) clearFlag("costAmount");
+                  }}
+                />
+                {flagNote("costAmount")}
+              </div>
+            </div>
+
+            {variance != null && (
+              <p
+                className={`mt-2 text-xs font-medium ${variance < 0 ? "text-red-700" : "text-green-700"}`}
+              >
+                {variance < 0
+                  ? `Estimate exceeds client price by ${formatCurrency(-variance)}`
+                  : `Margin vs client price: ${formatCurrency(variance)}`}
+              </p>
+            )}
+
+            {estimate && (
+              <div className="mt-3 overflow-x-auto rounded border border-zinc-200 bg-white">
+                <table className="min-w-full text-xs">
+                  <thead className="bg-zinc-50 text-left text-zinc-500">
+                    <tr>
+                      <th className="px-2 py-1">Type</th>
+                      <th className="px-2 py-1">Item</th>
+                      <th className="px-2 py-1 text-right">Qty</th>
+                      <th className="px-2 py-1 text-right">Unit $</th>
+                      <th className="px-2 py-1 text-right">Line $</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100">
+                    {estimate.lineItems.map((li, i) => (
+                      <tr key={i}>
+                        <td className="px-2 py-1 capitalize">{li.type}</td>
+                        <td className="px-2 py-1">
+                          {li.description}
+                          {li.ref ? ` (${li.ref})` : ""}
+                        </td>
+                        <td className="px-2 py-1 text-right">
+                          {li.quantity}
+                          {li.unit ? ` ${li.unit}` : ""}
+                        </td>
+                        <td className="px-2 py-1 text-right">
+                          {formatCurrency(li.unitCost)}
+                        </td>
+                        <td className="px-2 py-1 text-right">
+                          {formatCurrency(li.lineTotal)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="border-t border-zinc-200 text-zinc-700">
+                    <tr>
+                      <td colSpan={4} className="px-2 py-1 text-right">
+                        Subtotal
+                      </td>
+                      <td className="px-2 py-1 text-right">
+                        {formatCurrency(estimate.subtotal)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={4} className="px-2 py-1 text-right">
+                        Markup ({estimate.markupPct}%)
+                      </td>
+                      <td className="px-2 py-1 text-right">
+                        {formatCurrency(estimate.markupAmount)}
+                      </td>
+                    </tr>
+                    <tr className="font-semibold">
+                      <td colSpan={4} className="px-2 py-1 text-right">
+                        Total
+                      </td>
+                      <td className="px-2 py-1 text-right">
+                        {formatCurrency(estimate.total)}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+                {estimate.notes && (
+                  <p className="px-2 py-2 text-xs text-zinc-500">{estimate.notes}</p>
+                )}
+              </div>
+            )}
+
+            <p className="mt-2 text-xs text-zinc-400">
+              The estimate is internal — it isn’t shown on the client change-order
+              document.
+            </p>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="initiator" className={labelClass}>
                 Requested by

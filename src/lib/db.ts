@@ -5,6 +5,7 @@ import type {
   CostEquipment,
   CostLabour,
   CostMaterial,
+  Estimate,
   HistoricalChangeOrder,
   NewChangeOrderInput,
   Project,
@@ -65,7 +66,11 @@ function ensureSchema(): Promise<void> {
         source_received_at   TIMESTAMPTZ,
         source_external_id   TEXT,
         review_status        TEXT NOT NULL DEFAULT 'confirmed',
-        review_flags         JSONB NOT NULL DEFAULT '[]'::jsonb
+        review_flags         JSONB NOT NULL DEFAULT '[]'::jsonb,
+        client_quoted_amount NUMERIC,
+        estimated_amount     NUMERIC,
+        estimated_breakdown  JSONB,
+        markup_pct           NUMERIC
       )
     `;
     // Upgrade existing tables created before these columns existed.
@@ -76,6 +81,10 @@ function ensureSchema(): Promise<void> {
     await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS source_external_id TEXT`;
     await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS review_status TEXT NOT NULL DEFAULT 'confirmed'`;
     await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS review_flags JSONB NOT NULL DEFAULT '[]'::jsonb`;
+    await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS client_quoted_amount NUMERIC`;
+    await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS estimated_amount NUMERIC`;
+    await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS estimated_breakdown JSONB`;
+    await sql`ALTER TABLE change_orders ADD COLUMN IF NOT EXISTS markup_pct NUMERIC`;
 
     // Cost database: rate catalog + historical reference for the estimator.
     await sql`
@@ -169,6 +178,12 @@ function parseFlags(value: unknown): ReviewFlag[] {
   return Array.isArray(raw) ? (raw as ReviewFlag[]) : [];
 }
 
+function parseBreakdown(value: unknown): Estimate | null {
+  if (!value) return null;
+  const raw = typeof value === "string" ? JSON.parse(value) : value;
+  return raw && typeof raw === "object" ? (raw as Estimate) : null;
+}
+
 function toChangeOrder(r: Row): ChangeOrder {
   return {
     id: Number(r.id),
@@ -178,6 +193,12 @@ function toChangeOrder(r: Row): ChangeOrder {
     scopeDescription: String(r.scope_description),
     // NUMERIC comes back as a string from the driver — coerce to number.
     costAmount: r.cost_amount == null ? null : Number(r.cost_amount),
+    clientQuotedAmount:
+      r.client_quoted_amount == null ? null : Number(r.client_quoted_amount),
+    estimatedAmount:
+      r.estimated_amount == null ? null : Number(r.estimated_amount),
+    estimatedBreakdown: parseBreakdown(r.estimated_breakdown),
+    markupPct: r.markup_pct == null ? null : Number(r.markup_pct),
     status: String(r.status),
     approvalStatus: (r.approval_status as ChangeOrder["approvalStatus"]) ?? "None",
     initiator: (r.initiator as string) ?? null,
@@ -255,19 +276,25 @@ export async function createChangeOrder(
   const source = input.source ?? "manual";
   const reviewStatus = input.reviewStatus ?? "confirmed";
   const flags = JSON.stringify(input.reviewFlags ?? []);
+  const breakdown = input.estimatedBreakdown
+    ? JSON.stringify(input.estimatedBreakdown)
+    : null;
 
   const [{ id }] = (await sql`
     INSERT INTO change_orders
       (project_id, project_name, scope_description, cost_amount, status,
        approval_status, initiator, request_date, raw_input, client_approval_date,
        source, source_url, source_received_at, source_external_id,
-       review_status, review_flags)
+       review_status, review_flags,
+       client_quoted_amount, estimated_amount, estimated_breakdown, markup_pct)
     VALUES
       (${input.projectId}, ${input.projectName}, ${input.scopeDescription},
        ${input.costAmount}, ${status}, ${input.approvalStatus},
        ${input.initiator}, ${input.requestDate}, ${input.rawInput}, ${approvalDate},
        ${source}, ${input.sourceUrl ?? null}, ${input.sourceReceivedAt ?? null},
-       ${input.sourceExternalId ?? null}, ${reviewStatus}, ${flags}::jsonb)
+       ${input.sourceExternalId ?? null}, ${reviewStatus}, ${flags}::jsonb,
+       ${input.clientQuotedAmount ?? null}, ${input.estimatedAmount ?? null},
+       ${breakdown}::jsonb, ${input.markupPct ?? null})
     RETURNING id
   `) as { id: number }[];
 
@@ -291,6 +318,9 @@ export async function confirmChangeOrder(
   const status = input.status;
   const approvalDate =
     status === "Signed" ? new Date().toISOString().slice(0, 10) : null;
+  const breakdown = input.estimatedBreakdown
+    ? JSON.stringify(input.estimatedBreakdown)
+    : null;
 
   await sql`
     UPDATE change_orders SET
@@ -298,6 +328,10 @@ export async function confirmChangeOrder(
       project_name = ${input.projectName},
       scope_description = ${input.scopeDescription},
       cost_amount = ${input.costAmount},
+      client_quoted_amount = ${input.clientQuotedAmount ?? null},
+      estimated_amount = ${input.estimatedAmount ?? null},
+      estimated_breakdown = ${breakdown}::jsonb,
+      markup_pct = ${input.markupPct ?? null},
       status = ${status},
       approval_status = ${input.approvalStatus},
       initiator = ${input.initiator},

@@ -42,6 +42,35 @@ export interface ParsedChangeOrder {
   reviewFlags: ReviewFlag[];
 }
 
+// ---- Estimate (internal, AI-generated from the cost database) ----
+
+export const ESTIMATE_LINE_TYPES = [
+  "material",
+  "labour",
+  "equipment",
+  "other",
+] as const;
+export type EstimateLineType = (typeof ESTIMATE_LINE_TYPES)[number];
+
+export interface EstimateLineItem {
+  type: EstimateLineType;
+  ref: string | null; // catalog id (e.g. MAT-001) when applicable
+  description: string;
+  unit: string | null;
+  quantity: number;
+  unitCost: number;
+  lineTotal: number;
+}
+
+export interface Estimate {
+  lineItems: EstimateLineItem[];
+  subtotal: number;
+  markupPct: number;
+  markupAmount: number;
+  total: number;
+  notes: string | null;
+}
+
 export interface Project {
   id: number;
   name: string;
@@ -56,7 +85,11 @@ export interface ChangeOrder {
   projectId: number | null;
   projectName: string;
   scopeDescription: string;
-  costAmount: number | null;
+  costAmount: number | null; // final agreed CO value
+  clientQuotedAmount: number | null; // what the client wants to pay
+  estimatedAmount: number | null; // our estimate total
+  estimatedBreakdown: Estimate | null;
+  markupPct: number | null;
   status: string;
   approvalStatus: ApprovalStatus;
   initiator: string | null;
@@ -79,6 +112,10 @@ export interface NewChangeOrderInput {
   projectName: string;
   scopeDescription: string;
   costAmount: number | null;
+  clientQuotedAmount?: number | null;
+  estimatedAmount?: number | null;
+  estimatedBreakdown?: Estimate | null;
+  markupPct?: number | null;
   approvalStatus: ApprovalStatus;
   initiator: string | null;
   requestDate: string | null;
@@ -94,7 +131,6 @@ export interface NewChangeOrderInput {
 }
 
 // ---- Cost database (rate catalog + historical reference) ----
-
 export interface CostMaterial {
   id: number;
   itemId: string | null;
