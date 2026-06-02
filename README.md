@@ -61,5 +61,5 @@ src/
 
 ## Notes
 
-- The parser uses `claude-opus-4-8`. To reduce cost, change the `MODEL` constant in `src/lib/parse.ts` to `claude-sonnet-4-6` or `claude-haiku-4-5`.
+- The parser uses `claude-haiku-4-5` (cheapest; plenty for this extraction task). For higher-quality parsing, change the `MODEL` constant in `src/lib/parse.ts` to `claude-sonnet-4-6` or `claude-opus-4-8` (and add `effort` back into `output_config`, which Haiku doesn't support).
 - Company details in the generated document live in `src/lib/co-document.ts`.

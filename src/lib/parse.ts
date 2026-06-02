@@ -2,9 +2,11 @@ import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { APPROVAL_STATUSES, type ParsedChangeOrder } from "./types";
 
-// Per the project's Claude API guidance: default to the latest Opus.
-// Swap to "claude-sonnet-4-6" or "claude-haiku-4-5" to lower cost if desired.
-const MODEL = "claude-opus-4-8";
+// Haiku is the cheapest model and is plenty for this scoped extraction task.
+// Swap to "claude-sonnet-4-6" or "claude-opus-4-8" for higher-quality parsing.
+// Note: if you switch to Sonnet 4.6 / Opus you can also add `effort` back into
+// output_config below — Haiku 4.5 does not support the effort parameter.
+const MODEL = "claude-haiku-4-5";
 
 export class MissingApiKeyError extends Error {
   constructor() {
@@ -64,10 +66,9 @@ export async function parseChangeOrder(
     model: MODEL,
     max_tokens: 1024,
     system: SYSTEM_PROMPT,
-    // Extraction is a scoped task — keep thinking off and effort low for speed/cost.
+    // Extraction is a scoped task — keep thinking off for speed/cost.
     thinking: { type: "disabled" },
     output_config: {
-      effort: "low",
       format: { type: "json_schema", schema: OUTPUT_SCHEMA },
     },
     messages: [{ role: "user", content: rawInput }],
